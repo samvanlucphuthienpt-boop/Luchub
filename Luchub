@@ -181,6 +181,20 @@ loadstring([[
             game:GetService("TeleportService"):Teleport(game.PlaceId, player)
         end
     end)
+-- Mở khóa tối đa FPS (Vượt giới hạn máy)
+pcall(function()
+    setfpscap(999) -- Hoặc đặt số Hz màn hình của bro (ví dụ: 120)
+end)
+
+-- Bật tối ưu đồ họa ẩn để game bay màu giật lag
+pcall(function()
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level0
+    for _, v in pairs(game:GetService("Lighting"):GetDescendants()) do
+        if v:IsA("PostEffect") or v:IsA("Atmosphere") or v:IsA("Clouds") then
+            v.Enabled = false
+        end
+    end
+end)
 
     -- 2. Fast Attack
     createButton("⚔️ BẬT FAST ATTACK (ĐÁNH NHANH)", 2, function(state, btn)
