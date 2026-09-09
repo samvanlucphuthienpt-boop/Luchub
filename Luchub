@@ -1,11 +1,12 @@
 -- ==========================================
--- LỰC HUB PRO - FULL OPTIMIZED EDITION (120HZ)
+-- LỰC HUB PRO - UPDATE 30 ULTIMATE EDITION
 -- ==========================================
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local Lighting = game:GetService("Lighting")
+local VirtualUser = game:GetService("VirtualUser")
 
 -- Chống trùng lặp GUI cũ
 pcall(function()
@@ -20,7 +21,7 @@ pcall(function()
     setfpscap(999)
 end)
 
--- Tối ưu hóa đồ họa cực đoan (Cắt giảm hiệu ứng nặng máy)
+-- Tối ưu hóa đồ họa cực đoan
 pcall(function()
     settings().Rendering.QualityLevel = Enum.QualityLevel.Level0
     Lighting.GlobalShadows = false
@@ -28,12 +29,6 @@ pcall(function()
     for _, v in pairs(Lighting:GetDescendants()) do
         if v:IsA("PostEffect") or v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("Sky") then
             v.Enabled = false
-        end
-    end
-    -- Xóa hiệu ứng rác trong map
-    for _, v in pairs(Workspace:GetDescendants()) do
-        if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Fire") or v:IsA("Sparkles") or v:IsA("Smoke") then
-            v:Destroy()
         end
     end
 end)
@@ -46,8 +41,8 @@ ScreenGui.IgnoreGuiInset = true
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 240, 0, 310)
-MainFrame.Position = UDim2.new(0, 40, 0, 100)
+MainFrame.Size = UDim2.new(0, 240, 0, 460)
+MainFrame.Position = UDim2.new(0, 40, 0, 60)
 MainFrame.BackgroundColor3 = Color3.fromRGB(45, 20, 90)
 MainFrame.BorderSizePixel = 0
 MainFrame.Parent = ScreenGui
@@ -59,48 +54,44 @@ UICorner.Parent = MainFrame
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.BackgroundTransparency = 1
-Title.Text = "⚡ Lực Hub Pro 120Hz ⚡"
+Title.Text = "⚡ Lực Hub Pro Up 30 ⚡"
 Title.TextColor3 = Color3.fromRGB(255, 220, 0)
 Title.TextSize = 16
 Title.Font = Enum.Font.GothamBold
 Title.Parent = MainFrame
 
--- Nút Tối Ưu Đồ Họa & Fix Lag Toàn Diện
-local BtnFixLag = Instance.new("TextButton")
-BtnFixLag.Size = UDim2.new(0, 220, 0, 38)
-BtnFixLag.Position = UDim2.new(0, 10, 0, 50)
-BtnFixLag.BackgroundColor3 = Color3.fromRGB(80, 40, 140)
-BtnFixLag.Text = "🚀 TẮT HIỆU ỨNG / FIX LAG"
-BtnFixLag.TextColor3 = Color3.fromRGB(255, 255, 255)
-BtnFixLag.TextSize = 13
-BtnFixLag.Font = Enum.Font.GothamBold
-BtnFixLag.Parent = MainFrame
-Instance.new("UICorner", BtnFixLag).CornerRadius = UDim.new(0, 8)
+local function createButton(posY, text)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 220, 0, 36)
+    btn.Position = UDim2.new(0, 10, 0, posY)
+    btn.BackgroundColor3 = Color3.fromRGB(80, 40, 140)
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 12
+    btn.Font = Enum.Font.GothamBold
+    btn.Parent = MainFrame
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+    return btn
+end
 
+-- 1. Nút Fix Lag
+local BtnFixLag = createButton(45, "🚀 BẬT FIX LAG / TẮT HIỆU ỨNG")
 BtnFixLag.MouseButton1Click:Connect(function()
     pcall(function()
         for _, v in pairs(Workspace:GetDescendants()) do
             if v:IsA("BasePart") then
                 v.Material = Enum.Material.SmoothPlastic
                 v.Reflectance = 0
+            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Fire") then
+                v:Destroy()
             end
         end
     end)
-    BtnFixLag.Text = "✅ ĐÃ TỐI ƯU ĐỒ HỌA"
+    BtnFixLag.Text = "✅ ĐÃ BẬT FIX LAG"
 end)
 
--- Nút Fast Attack (Tự động đánh nhanh không lỗi)
-local BtnFast = Instance.new("TextButton")
-BtnFast.Size = UDim2.new(0, 220, 0, 38)
-BtnFast.Position = UDim2.new(0, 10, 0, 95)
-BtnFast.BackgroundColor3 = Color3.fromRGB(80, 40, 140)
-BtnFast.Text = "⚔️ BẬT FAST ATTACK"
-BtnFast.TextColor3 = Color3.fromRGB(255, 255, 255)
-BtnFast.TextSize = 14
-BtnFast.Font = Enum.Font.GothamBold
-BtnFast.Parent = MainFrame
-Instance.new("UICorner", BtnFast).CornerRadius = UDim.new(0, 8)
-
+-- 2. Nút Fast Attack (Tự động đánh không cần click màn hình)
+local BtnFast = createButton(85, "⚔️ BẬT FAST ATTACK (AUTO)")
 local fastAttackEnabled = false
 BtnFast.MouseButton1Click:Connect(function()
     fastAttackEnabled = not fastAttackEnabled
@@ -109,45 +100,69 @@ BtnFast.MouseButton1Click:Connect(function()
         task.spawn(function()
             while fastAttackEnabled do
                 pcall(function()
-                    local vim = game:GetService("VirtualInputManager")
-                    vim:SendMouseButtonEvent(0, 0, 0, true, game, 0)
-                    vim:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+                    -- Kích hoạt đòn đánh liên tục thông qua Combat Framework hoặc RemoteEvent chuẩn Blox Fruits
+                    local combat = debug.getupvalues(require(LocalPlayer.PlayerScripts.CombatFramework))
+                    local cam = combat[2]
+                    for _, v in pairs(cam.activeController.aliases) do
+                        if v then
+                            v.tapToAttack = true
+                        end
+                    end
                 end)
-                task.wait(0.05)
+                task.wait(0.01)
             end
         end)
     else
-        BtnFast.Text = "⚔️ BẬT FAST ATTACK"
+        BtnFast.Text = "⚔️ BẬT FAST ATTACK (AUTO)"
     end
 end)
 
--- Nút ESP Player & Trái Ác Quỷ (Đã fix chuẩn khoảng cách mét)
-local BtnEsp = Instance.new("TextButton")
-BtnEsp.Size = UDim2.new(0, 220, 0, 38)
-BtnEsp.Position = UDim2.new(0, 10, 0, 140)
-BtnEsp.BackgroundColor3 = Color3.fromRGB(80, 40, 140)
-BtnEsp.Text = "👁️ BẬT ESP (PLAYER + TRÁI)"
-BtnEsp.TextColor3 = Color3.fromRGB(255, 255, 255)
-BtnEsp.TextSize = 13
-BtnEsp.Font = Enum.Font.GothamBold
-BtnEsp.Parent = MainFrame
-Instance.new("UICorner", BtnEsp).CornerRadius = UDim.new(0, 8)
-
-local espEnabled = false
-BtnEsp.MouseButton1Click:Connect(function()
-    espEnabled = not espEnabled
-    if espEnabled then
-        BtnEsp.Text = "✅ ĐANG BẬT ESP"
+-- 3. Nút Hitbox Siêu Xa (An toàn không mất nút trang bị)
+local BtnHitbox = createButton(125, "🎯 BẬT ĐÁNH XA (HITBOX)")
+local hitboxEnabled = false
+BtnHitbox.MouseButton1Click:Connect(function()
+    hitboxEnabled = not hitboxEnabled
+    if hitboxEnabled then
+        BtnHitbox.Text = "✅ ĐANG BẬT HITBOX XA"
         task.spawn(function()
-            while espEnabled do
+            while hitboxEnabled do
                 pcall(function()
-                    -- ESP Người chơi
+                    for _, v in pairs(Workspace.Enemies:GetChildren()) do
+                        local hrp = v:FindFirstChild("HumanoidRootPart")
+                        local hum = v:FindFirstChild("Humanoid")
+                        if hrp and hum and hum.Health > 0 then
+                            hrp.Size = Vector3.new(30, 30, 30)
+                            hrp.Transparency = 0.8
+                            hrp.CanCollide = false
+                        end
+                    end
+                end)
+                task.wait(1)
+            end
+        end)
+    else
+        BtnHitbox.Text = "🎯 BẬT ĐÁNH XA (HITBOX)"
+    end
+end)
+
+-- 4. ESP Player (Kèm hiện Tên và Máu HP)
+local BtnEspPlayer = createButton(165, "👁️ BẬT ESP PLAYER + MÁU")
+local espPlayerEnabled = false
+BtnEspPlayer.MouseButton1Click:Connect(function()
+    espPlayerEnabled = not espPlayerEnabled
+    if espPlayerEnabled then
+        BtnEspPlayer.Text = "✅ ĐANG BẬT ESP PLAYER"
+        task.spawn(function()
+            while espPlayerEnabled do
+                pcall(function()
                     for _, p in pairs(Players:GetPlayers()) do
-                        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
-                            if not p.Character.Head:FindFirstChild("LuchubESP") then
-                                local bg = Instance.new("BillboardGui", p.Character.Head)
-                                bg.Name = "LuchubESP"
-                                bg.Size = UDim2.new(0, 100, 0, 40)
+                        if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") and p.Character:FindFirstChild("Humanoid") then
+                            local head = p.Character.Head
+                            local hum = p.Character.Humanoid
+                            if not head:FindFirstChild("LuchubPlayerESP") then
+                                local bg = Instance.new("BillboardGui", head)
+                                bg.Name = "LuchubPlayerESP"
+                                bg.Size = UDim2.new(0, 120, 0, 50)
                                 bg.AlwaysOnTop = true
                                 local txt = Instance.new("TextLabel", bg)
                                 txt.Size = UDim2.new(1, 0, 1, 0)
@@ -155,53 +170,118 @@ BtnEsp.MouseButton1Click:Connect(function()
                                 txt.TextColor3 = Color3.fromRGB(0, 255, 255)
                                 txt.TextSize = 12
                                 txt.Font = Enum.Font.GothamBold
-                                txt.Text = p.Name
-                            end
-                        end
-                    end
-                    -- ESP Trái ác quỷ rơi tự nhiên kèm đo khoảng cách mét
-                    for _, obj in pairs(Workspace:GetChildren()) do
-                        if obj:IsA("Tool") and obj:FindFirstChild("Handle") then
-                            if not obj.Handle:FindFirstChild("FruitESP") then
-                                local bg = Instance.new("BillboardGui", obj.Handle)
-                                bg.Name = "FruitESP"
-                                bg.Size = UDim2.new(0, 140, 0, 50)
-                                bg.AlwaysOnTop = true
-                                bg.StudsOffset = Vector3.new(0, 2, 0)
-                                
-                                local txt = Instance.new("TextLabel", bg)
-                                txt.Size = UDim2.new(1, 0, 1, 0)
-                                txt.BackgroundTransparency = 1
-                                txt.TextColor3 = Color3.fromRGB(255, 50, 50)
-                                txt.TextSize = 13
-                                txt.Font = Enum.Font.GothamBold
                                 txt.Parent = bg
                             end
-                            
-                            local espGui = obj.Handle:FindFirstChild("FruitESP")
-                            if espGui and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                                local hrp = LocalPlayer.Character.HumanoidRootPart
-                                local distance = math.floor((hrp.Position - obj.Handle.Position).Magnitude)
+                            local espGui = head:FindFirstChild("LuchubPlayerESP")
+                            if espGui then
                                 local txtLabel = espGui:FindFirstChildOfClass("TextLabel")
                                 if txtLabel then
-                                    txtLabel.Text = "🍎 " .. obj.Name .. "\n[" .. distance .. "m]"
+                                    txtLabel.Text = p.Name .. "\n❤️ HP: " .. math.floor(hum.Health)
                                 end
                             end
                         end
                     end
                 end)
-                task.wait(2)
+                task.wait(1)
             end
         end)
     else
-        BtnEsp.Text = "👁️ BẬT ESP (PLAYER + TRÁI)"
+        BtnEspPlayer.Text = "👁️ BẬT ESP PLAYER + MÁU"
         pcall(function()
             for _, p in pairs(Players:GetPlayers()) do
                 if p.Character and p.Character:FindFirstChild("Head") then
-                    local esp = p.Character.Head:FindFirstChild("LuchubESP")
+                    local esp = p.Character.Head:FindFirstChild("LuchubPlayerESP")
                     if esp then esp:Destroy() end
                 end
             end
         end)
     end
+end)
+
+-- 5. ESP Trái Ác Quỷ Update 30 & Auto Bay Nhặt Trái
+local BtnEspFruit = createButton(205, "🍎 ESP TRÁI + AUTO NHẶT")
+local espFruitEnabled = false
+BtnEspFruit.MouseButton1Click:Connect(function()
+    espFruitEnabled = not espFruitEnabled
+    if espFruitEnabled then
+        BtnEspFruit.Text = "✅ ĐANG CHẠY ESP TRÁI & NHẶT"
+        task.spawn(function()
+            while espFruitEnabled do
+                pcall(function()
+                    -- Quét toàn bộ kho lưu trữ trái ác quỷ Update 30
+                    for _, obj in pairs(Workspace:GetChildren()) do
+                        if obj:IsA("Tool") and (obj.Name:find("Fruit") or obj.Name:find("Devil") or obj:Name:find("Trái")) then
+                            if obj:FindFirstChild("Handle") then
+                                if not obj.Handle:FindFirstChild("FruitESPUp30") then
+                                    local bg = Instance.new("BillboardGui", obj.Handle)
+                                    bg.Name = "FruitESPUp30"
+                                    bg.Size = UDim2.new(0, 150, 0, 50)
+                                    bg.AlwaysOnTop = true
+                                    bg.StudsOffset = Vector3.new(0, 2, 0)
+                                    local txt = Instance.new("TextLabel", bg)
+                                    txt.Size = UDim2.new(1, 0, 1, 0)
+                                    txt.BackgroundTransparency = 1
+                                    txt.TextColor3 = Color3.fromRGB(255, 50, 50)
+                                    txt.TextSize = 13
+                                    txt.Font = Enum.Font.GothamBold
+                                    txt.Parent = bg
+                                end
+                                
+                                -- Đo khoảng cách và tự động bay đến nhặt
+                                local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                                if hrp then
+                                    local distance = math.floor((hrp.Position - obj.Handle.Position).Magnitude)
+                                    local espGui = obj.Handle:FindFirstChild("FruitESPUp30")
+                                    if espGui then
+                                        local txtLabel = espGui:FindFirstChildOfClass("TextLabel")
+                                        if txtLabel then
+                                            txtLabel.Text = "🍎 " .. obj.Name .. "\n[" .. distance .. "m] (Đang bay nhặt!)"
+                                        end
+                                    end
+                                    
+                                    -- Tự động dịch chuyển/bay đến vị trí trái ác quỷ để nhặt
+                                    hrp.CFrame = CFrame.new(obj.Handle.Position + Vector3.new(0, 3, 0))
+                                end
+                            end
+                        end
+                    end
+                end)
+                task.wait(0.5)
+            end
+        end)
+    else
+        BtnEspFruit.Text = "🍎 ESP TRÁI + AUTO NHẶT"
+    end
+end)
+
+-- 6. Nút Fullbright
+local BtnFull = createButton(245, "💡 BẬT SÁNG MAP (FULLBRIGHT)")
+BtnFull.MouseButton1Click:Connect(function()
+    pcall(function()
+        Lighting.Brightness = 2
+        Lighting.ClockTime = 14
+        Lighting.FogEnd = 9e9
+        Lighting.GlobalShadows = false
+    end)
+    BtnFull.Text = "✅ ĐÃ BẬT FULLBRIGHT"
+end)
+
+-- 7. Nút Chống Kick AFK
+local BtnAfk = createButton(285, "🛡️ CHỐNG KICK AFK")
+BtnAfk.MouseButton1Click:Connect(function()
+    pcall(function()
+        LocalPlayer.Idled:Connect(function()
+            VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+            task.wait(1)
+            VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+        end)
+    end)
+    BtnAfk.Text = "✅ ĐÃ BẬT CHỐNG KICK"
+end)
+
+-- 8. Nút Tắt & Xóa Menu
+local BtnClose = createButton(325, "❌ TẮT & XÓA MENU")
+BtnClose.BackgroundColor3 = Color3.fromRGB(150, 30, 30)
+BtnClose.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
 end)
