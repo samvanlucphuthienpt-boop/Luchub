@@ -1,0 +1,422 @@
+loadstring([[
+    -- Lực Hub Pro [Scrolling & Ultimate Fix Lag] - No Key
+    local player = game.Players.LocalPlayer
+    local playerGui = player:WaitForChild("PlayerGui")
+    
+    if playerGui:FindFirstChild("LucHubProUltimate") then
+        playerGui.LucHubProUltimate:Destroy()
+    end
+
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "LucHubProUltimate"
+    ScreenGui.ResetOnSpawn = false
+    ScreenGui.IgnoreGuiInset = true
+    ScreenGui.Parent = playerGui
+
+    -- 1. Thanh hiển thị FPS ở góc trên trái (cố định)
+    local FpsFrame = Instance.new("Frame")
+    FpsFrame.Size = UDim2.new(0, 140, 0, 30)
+    FpsFrame.Position = UDim2.new(0, 10, 0, 10)
+    FpsFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+    FpsFrame.BorderSizePixel = 0
+    FpsFrame.Parent = ScreenGui
+
+    Instance.new("UICorner", FpsFrame).CornerRadius = UDim.new(0, 6)
+    local strokeFps = Instance.new("UIStroke", FpsFrame)
+    strokeFps.Color = Color3.fromRGB(138, 43, 226)
+    strokeFps.Thickness = 1.5
+
+    local FpsLabel = Instance.new("TextLabel")
+    FpsLabel.Size = UDim2.new(1, 0, 1, 0)
+    FpsLabel.BackgroundTransparency = 1
+    FpsLabel.Text = "⚡ FPS: Đang đo..."
+    FpsLabel.TextColor3 = Color3.fromRGB(186, 85, 211)
+    FpsLabel.Font = Enum.Font.SourceSansBold
+    FpsLabel.TextSize = 13
+    FpsLabel.Parent = FpsFrame
+
+    local RunService = game:GetService("RunService")
+    local lastUpdate, frameCount = 0, 0
+    RunService.RenderStepped:Connect(function()
+        frameCount = frameCount + 1
+        local now = tick()
+        if now - lastUpdate >= 0.5 then
+            local fps = math.floor(frameCount / (now - lastUpdate))
+            FpsLabel.Text = "⚡ FPS: " .. fps
+            if fps < 30 then
+                FpsLabel.TextColor3 = Color3.fromRGB(255, 70, 70)
+            else
+                FpsLabel.TextColor3 = Color3.fromRGB(186, 85, 211)
+            end
+            frameCount = 0
+            lastUpdate = now
+        end
+    end)
+
+    -- 2. Menu Chính (Có thể di chuyển mượt mà)
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Size = UDim2.new(0, 240, 0, 320)
+    MainFrame.Position = UDim2.new(0, 10, 0, 55)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Active = true
+    MainFrame.Draggable = true
+    MainFrame.Parent = ScreenGui
+
+    Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
+    local strokeMenu = Instance.new("UIStroke", MainFrame)
+    strokeMenu.Color = Color3.fromRGB(138, 43, 226)
+    strokeMenu.Thickness = 1.8
+
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(1, 0, 0, 40)
+    Title.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+    Title.Text = "Lực Hub Pro 🤑🐧"
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.Font = Enum.Font.SourceSansBold
+    Title.TextSize = 14
+    Title.Parent = MainFrame
+    Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 8)
+
+    -- ScrollingFrame chứa danh sách tính năng (Có thể kéo lên kéo xuống mượt mà)
+    local Container = Instance.new("ScrollingFrame")
+    Container.Size = UDim2.new(1, -10, 1, -50)
+    Container.Position = UDim2.new(0, 5, 0, 45)
+    Container.BackgroundTransparency = 1
+    Container.BorderSizePixel = 0
+    Container.CanvasSize = UDim2.new(0, 0, 0, 340) -- Tự động co giãn theo số lượng nút
+    Container.ScrollBarThickness = 4
+    Container.Parent = MainFrame
+
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    UIListLayout.Padding = UDim.new(0, 8)
+    UIListLayout.Parent = Container
+
+    -- Nút ẩn/hiện menu nhanh
+    local ToggleButton = Instance.new("TextButton")
+    ToggleButton.Size = UDim2.new(0, 100, 0, 28)
+    ToggleButton.Position = UDim2.new(0, 160, 0, 10)
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
+    ToggleButton.Text = "ẨN MENU"
+    ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleButton.Font = Enum.Font.SourceSansBold
+    ToggleButton.TextSize = 12
+    ToggleButton.Parent = ScreenGui
+    Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(0, 6)
+
+    local menuVisible = true
+    ToggleButton.MouseButton1Click:Connect(function()
+        menuVisible = not menuVisible
+        MainFrame.Visible = menuVisible
+        ToggleButton.Text = menuVisible and "ẨN MENU" or "HIỆN MENU"
+    end)
+
+    -- Hàm tạo nút tính năng tự động đưa vào Container cuộn
+    local function createButton(name, order, callback)
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, -10, 0, 35)
+        btn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+        btn.Text = name
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.Font = Enum.Font.SourceSansBold
+        btn.TextSize = 13
+        btn.LayoutOrder = order
+        btn.Parent = Container
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+        
+        local active = false
+        btn.MouseButton1Click:Connect(function()
+            active = not active
+            callback(active, btn)
+        end)
+    end
+
+    -- 1. Lực Fix Lag (Đã xóa hiệu ứng chói, quái chết và hiệu ứng đánh đàn Soul Guitar)
+    createButton("✨ BẬT FIX LAG (BẢN NHẸ)", 1, function(state, btn)
+        if state then
+            btn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+            btn.Text = "ĐANG BẬT: FIX LAG"
+            
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "LỰC FIX LAG",
+                Text = "Đã xóa hiệu ứng chói, quái chết & đàn Soul Guitar!",
+                Icon = "rbxassetid://6031071833",
+                Duration = 3
+            })
+
+            local Lighting = game:GetService("Lighting")
+            Lighting.GlobalShadows = false
+            for _, v in pairs(Lighting:GetChildren()) do
+                if v:IsA("BlurEffect") or v:IsA("SunRaysEffect") or v:IsA("ColorCorrectionEffect") then
+                    v.Enabled = false
+                end
+            end
+
+            local function lightClean(v)
+                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Highlight") then
+                    v:Destroy()
+                end
+                -- Xóa hiệu ứng đặc trưng của Soul Guitar (Note, Music, Beam phụt ra khi gảy đàn)
+                if v.Name == "SoulGuitar" or v.Name:lower():find("soul") or v.Name:lower():find("guitar") or v.Name:lower():find("note") then
+                    for _, effect in pairs(v:GetDescendants()) do
+                        if effect:IsA("ParticleEmitter") or effect:IsA("Trail") or effect:IsA("Beam") then
+                            effect:Destroy()
+                        end
+                    end
+                end
+            end
+
+            for _, v in pairs(workspace:GetDescendants()) do
+                lightClean(v)
+            end
+
+            workspace.DescendantAdded:Connect(function(v)
+                task.wait()
+                lightClean(v)
+            end)
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+            btn.Text = "✨ BẬT FIX LAG (BẢN NHẸ)"
+            game:GetService("TeleportService"):Teleport(game.PlaceId, player)
+        end
+    end)
+
+    -- 2. Fast Attack
+    createButton("⚔️ BẬT FAST ATTACK (ĐÁNH NHANH)", 2, function(state, btn)
+        if state then
+            btn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+            btn.Text = "ĐANG BẬT: FAST ATTACK"
+            getgenv().FastAttack = true
+            task.spawn(function()
+                while getgenv().FastAttack do
+                    task.wait(0.05)
+                    pcall(function()
+                        local RigController = require(player.PlayerScripts.CombatFramework.RigController)
+                        if RigController.current() then
+                            for _, v in pairs(RigController.current().InitiateService:GetChildren()) do
+                                if v:IsA("ObjectValue") then
+                                    local target = v.Value
+                                    if target and target:FindFirstChild("Humanoid") and target.Humanoid.Health > 0 then
+                                        local vu = game:GetService("VirtualUser")
+                                        vu:Button1Down(Vector2.new(0,0))
+                                        vu:Button1Up(Vector2.new(0,0))
+                                    end
+                                end
+                            end
+                        end
+                    end)
+                end
+            end)
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+            btn.Text = "⚔️ BẬT FAST ATTACK (ĐÁNH NHANH)"
+            getgenv().FastAttack = false
+        end
+    end)
+
+    -- 3. Đánh Xa (Hitbox tàng hình)
+    createButton("🎯 BẬT ĐÁNH XA (HITBOX SIÊU XA)", 3, function(state, btn)
+        if state then
+            btn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+            btn.Text = "ĐANG BẬT: ĐÁNH XA"
+            getgenv().HitboxActive = true
+            task.spawn(function()
+                while getgenv().HitboxActive do
+                    task.wait(0.5)
+                    pcall(function()
+                        if workspace:FindFirstChild("Enemies") then
+                            for _, v in pairs(workspace.Enemies:GetChildren()) do
+                                local root = v:FindFirstChild("HumanoidRootPart")
+                                local hum = v:FindFirstChildOfClass("Humanoid")
+                                if root and hum and hum.Health > 0 then
+                                    root.Size = Vector3.new(65, 65, 65)
+                                    root.Transparency = 1
+                                    root.CanCollide = false
+                                end
+                            end
+                        end
+                    end)
+                end
+            end)
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+            btn.Text = "🎯 BẬT ĐÁNH XA (HITBOX SIÊU XA)"
+            getgenv().HitboxActive = false
+            pcall(function()
+                if workspace:FindFirstChild("Enemies") then
+                    for _, v in pairs(workspace.Enemies:GetChildren()) do
+                        local root = v:FindFirstChild("HumanoidRootPart")
+                        if root then
+                            root.Size = Vector3.new(2, 2, 1)
+                            root.Transparency = 1
+                        end
+                    end
+                end
+            end)
+        end
+    end)
+
+    -- 4. ESP Trái Ác Quỷ (Khoảng cách vô cực)
+    createButton("🍎 BẬT ESP TRÁI ÁC QUỶ", 4, function(state, btn)
+        if state then
+            btn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+            btn.Text = "ĐANG BẬT: ESP TRÁI CÂY"
+            getgenv().FruitESP = true
+            task.spawn(function()
+                while getgenv().FruitESP do
+                    task.wait(1)
+                    for _, v in pairs(workspace:GetChildren()) do
+                        if v:IsA("Tool") and v:FindFirstChild("Handle") then
+                            if not v.Handle:FindFirstChild("ESP_Tag") then
+                                local bg = Instance.new("BillboardGui", v.Handle)
+                                bg.Name = "ESP_Tag"
+                                bg.Size = UDim2.new(0, 150, 0, 60)
+                                bg.AlwaysOnTop = true
+                                bg.MaxDistance = 9e9
+                                
+                                local txt = Instance.new("TextLabel", bg)
+                                txt.Size = UDim2.new(1, 0, 1, 0)
+                                txt.BackgroundTransparency = 1
+                                txt.Text = "🍎 " .. v.Name
+                                txt.TextColor3 = Color3.fromRGB(255, 50, 50)
+                                txt.Font = Enum.Font.SourceSansBold
+                                txt.TextSize = 16
+                                txt.TextStrokeTransparency = 0
+                            end
+                        end
+                    end
+                end
+            end)
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+            btn.Text = "🍎 BẬT ESP TRÁI ÁC QUỶ"
+            getgenv().FruitESP = false
+            for _, v in pairs(workspace:GetChildren()) do
+                if v:IsA("Tool") and v:FindFirstChild("Handle") then
+                    local tag = v.Handle:FindFirstChild("ESP_Tag")
+                    if tag then tag:Destroy() end
+                end
+            end
+        end
+    end)
+
+    -- 5. ESP Player & Máu (Nhìn xa vô cực)
+    createButton("👀 BẬT ESP PLAYER & MÁU", 5, function(state, btn)
+        if state then
+            btn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+            btn.Text = "ĐANG BẬT: ESP PLAYER"
+            getgenv().PlayerESP = true
+            
+            local function addESP(p)
+                if p ~= player then
+                    p.CharacterAdded:Connect(function(char)
+                        task.wait(1)
+                        if getgenv().PlayerESP and char:FindFirstChild("Head") and not char.Head:FindFirstChild("PlayerESP_Tag") then
+                            local bg = Instance.new("BillboardGui", char.Head)
+                            bg.Name = "PlayerESP_Tag"
+                            bg.Size = UDim2.new(0, 200, 0, 50)
+                            bg.AlwaysOnTop = true
+                            bg.MaxDistance = 9e9
+
+                            local txt = Instance.new("TextLabel", bg)
+                            txt.Size = UDim2.new(1, 0, 1, 0)
+                            txt.BackgroundTransparency = 1
+                            txt.Font = Enum.Font.SourceSansBold
+                            txt.TextSize = 14
+                            txt.TextColor3 = Color3.fromRGB(0, 255, 255)
+                            txt.TextStrokeTransparency = 0
+
+                            RunService.RenderStepped:Connect(function()
+                                pcall(function()
+                                    if char and char:FindFirstChild("Humanoid") then
+                                        local hum = char.Humanoid
+                                        txt.Text = p.Name .. "\n❤️ Máu: " .. math.floor(hum.Health) .. "/" .. math.floor(hum.MaxHealth)
+                                    end
+                                end)
+                            end)
+                        end
+                    end)
+                    if p.Character and p.Character:FindFirstChild("Head") and not p.Character.Head:FindFirstChild("PlayerESP_Tag") then
+                        local char = p.Character
+                        local bg = Instance.new("BillboardGui", char.Head)
+                        bg.Name = "PlayerESP_Tag"
+                        bg.Size = UDim2.new(0, 200, 0, 50)
+                        bg.AlwaysOnTop = true
+                        bg.MaxDistance = 9e9
+
+                        local txt = Instance.new("TextLabel", bg)
+                        txt.Size = UDim2.new(1, 0, 1, 0)
+                        txt.BackgroundTransparency = 1
+                        txt.Font = Enum.Font.SourceSansBold
+                        txt.TextSize = 14
+                        txt.TextColor3 = Color3.fromRGB(0, 255, 255)
+                        txt.TextStrokeTransparency = 0
+
+                        RunService.RenderStepped:Connect(function()
+                            pcall(function()
+                                if char and char:FindFirstChild("Humanoid") then
+                                    local hum = char.Humanoid
+                                    txt.Text = p.Name .. "\n❤️ Máu: " .. math.floor(hum.Health) .. "/" .. math.floor(hum.MaxHealth)
+                                end
+                            end)
+                        end)
+                    end
+                end
+            end
+
+            for _, p in pairs(game.Players:GetPlayers()) do
+                addESP(p)
+            end
+            game.Players.PlayerAdded:Connect(addESP)
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+            btn.Text = "👀 BẬT ESP PLAYER & MÁU"
+            getgenv().PlayerESP = false
+            for _, p in pairs(game.Players:GetPlayers()) do
+                if p.Character and p.Character:FindFirstChild("Head") then
+                    local tag = p.Character.Head:FindFirstChild("PlayerESP_Tag")
+                    if tag then tag:Destroy() end
+                end
+            end
+        end
+    end)
+
+    -- 6. Fullbright
+    createButton("🌕 BẬT SÁNG MAP (FULLBRIGHT)", 6, function(state, btn)
+        if state then
+            btn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+            btn.Text = "ĐANG BẬT: FULLBRIGHT"
+            local Lighting = game:GetService("Lighting")
+            Lighting.Brightness = 2
+            Lighting.ClockTime = 14
+            Lighting.FogEnd = 9e9
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+            btn.Text = "🌕 BẬT SÁNG MAP (FULLBRIGHT)"
+            game:GetService("Lighting").Brightness = 1
+        end
+    end)
+
+    -- 7. Chống AFK
+    createButton("🛡️ CHỐNG KICK AFK", 7, function(state, btn)
+        if state then
+            btn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+            btn.Text = "ĐANG BẬT: CHỐNG AFK"
+            local vu = game:GetService("VirtualUser")
+            player.Idled:Connect(function()
+                vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+                task.wait(1)
+                vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+            end)
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(75, 0, 130)
+            btn.Text = "🛡️ CHỐNG KICK AFK"
+        end
+    end)
+
+    -- 8. Xóa Menu Hoàn Toàn
+    createButton("❌ TẮT & XÓA MENU", 8, function(state, btn)
+        ScreenGui:Destroy()
+    end)
+]])()
